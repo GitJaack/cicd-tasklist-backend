@@ -81,7 +81,9 @@ pipeline {
 
         stage('8. Build Docker image') {
             steps {
-                bat 'docker build -t ${IMAGE_REF} -t ${IMAGE_NAME}:latest .'
+                bat """
+                    docker build -t %IMAGE_REF% -t %IMAGE_NAME%:latest .
+                """
             }
         }
 
