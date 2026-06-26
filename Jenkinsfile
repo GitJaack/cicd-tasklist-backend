@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CRED = credentials('yjack-dockerhub-password')
+        DOCKERHUB_CRED = credentials('yjack-dockerhub-password2')
 
         IMAGE_NAME = "${DOCKERHUB_CRED_USR}/tasklist-backend"
         IMAGE_TAG  = "${BUILD_NUMBER}"
@@ -59,7 +59,7 @@ pipeline {
         stage('6. SonarQube analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    withCredentials([string(credentialsId: 'yjack-sonar-token', variable: 'SONAR_TOKEN')]) {
+                    withCredentials([string(credentialsId: 'yjack-sonar-token2', variable: 'SONAR_TOKEN')]) {
                         sh '''
                             sonar-scanner \
                               -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
