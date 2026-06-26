@@ -24,19 +24,19 @@ pipeline {
 
         stage('1. Install dependencies') {
             steps {
-                bat 'npm ci'
+                sh 'npm ci'
             }
         }
 
         stage('2. Prisma generate') {
             steps {
-                bat 'npm run prisma:generate'
+                sh 'npm run prisma:generate'
             }
         }
 
         stage('3. Unit tests') {
             steps {
-                bat 'npm run test:coverage'
+                sh 'npm run test:coverage'
             }
             post {
                 always {
@@ -47,7 +47,7 @@ pipeline {
 
         stage('5. End-to-end tests') {
             steps {
-                bat 'npm run test:e2e -- --outputFile.junit=reports/junit-e2e.xml'
+                sh 'npm run test:e2e -- --outputFile.junit=reports/junit-e2e.xml'
             }
             post {
                 always {
@@ -60,7 +60,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     withCredentials([string(credentialsId: 'yjack-sonar-token', variable: 'SONAR_TOKEN')]) {
-                        bat '''
+                        sh '''
                             sonar-scanner \
                               -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
                               -Dsonar.token=${SONAR_TOKEN}
@@ -80,14 +80,14 @@ pipeline {
 
         stage('8. Build Docker image') {
             steps {
-                bat 'docker build -t ${IMAGE_REF} -t ${IMAGE_NAME}:latest .'
+                sh 'docker build -t ${IMAGE_REF} -t ${IMAGE_NAME}:latest .'
             }
         }
 
         stage('9. Trivy scan + reports') {
             steps {
-                bat '''
-                    bat 'mkdir reports'
+                sh '''
+                    mkdir -p reports
                     trivy image --no-progress --format table \
                         --output reports/trivy-report.txt ${IMAGE_REF}
                     trivy image --no-progress --format json \
@@ -103,7 +103,7 @@ pipeline {
 
         stage('Trivy security gate') {
             steps {
-                bat '''
+                sh '''
                     trivy image --no-progress --exit-code 1 \
                         --severity HIGH,CRITICAL ${IMAGE_REF}
                 '''
@@ -112,7 +112,7 @@ pipeline {
 
         stage('11. Generate SBOM') {
             steps {
-                bat '''
+                sh '''
                     mkdir -p reports
                     trivy image --no-progress --format cyclonedx \
                         --output reports/sbom.cdx.json ${IMAGE_REF}
@@ -127,7 +127,7 @@ pipeline {
 
         stage('12. Push Docker image') {
             steps {
-                bat '''
+                sh '''
                     echo "${DOCKERHUB_CRED_PSW}" | docker login -u "${DOCKERHUB_CRED_USR}" --password-stdin
                     docker push ${IMAGE_REF}
                     docker push ${IMAGE_NAME}:latest
@@ -140,7 +140,7 @@ pipeline {
     post {
         // 13. Nettoyage du workspace Jenkins en fin de pipeline
         always {
-            cleanWs()
+            deleteDir()
         }
     }
 }
