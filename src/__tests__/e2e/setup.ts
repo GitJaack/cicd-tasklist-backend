@@ -9,13 +9,11 @@ const projectRoot = path.resolve(__dirname, "../../../");
 const testSchemaPath = path.join(projectRoot, "prisma", "schema-test.prisma");
 const testDbPath = path.join(projectRoot, "prisma", "test.db");
 
-// Generate test Prisma client (SQLite provider, separate output)
 execSync(`npx prisma generate --schema="${testSchemaPath}"`, {
   cwd: projectRoot,
   stdio: "pipe",
 });
 
-// Push schema to test DB (creates/resets the SQLite file)
 execSync(
   `npx prisma db push --schema="${testSchemaPath}" --force-reset --accept-data-loss`,
   {
@@ -24,7 +22,6 @@ execSync(
   }
 );
 
-// Import PrismaClient from the test-specific generated client
 const require = createRequire(import.meta.url);
 const clientPath = path.join(
   projectRoot,
@@ -32,7 +29,6 @@ const clientPath = path.join(
   ".prisma",
   "client-test"
 );
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { PrismaClient } = require(clientPath) as {
   PrismaClient: new (opts?: unknown) => import("@prisma/client").PrismaClient;
 };
