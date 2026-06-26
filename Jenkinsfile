@@ -89,13 +89,15 @@ pipeline {
 
         stage('9. Trivy scan + reports') {
             steps {
-                bat '''
-                    mkdir -p reports
-                    trivy image --no-progress --format table \
-                        --output reports/trivy-report.txt ${IMAGE_REF}
-                    trivy image --no-progress --format json \
-                        --output reports/trivy-report.json ${IMAGE_REF}
-                '''
+                bat """
+                    if not exist reports mkdir reports
+
+                    trivy image --no-progress --format table ^
+                        --output reports/trivy-report.txt %IMAGE_REF%
+
+                    trivy image --no-progress --format json ^
+                        --output reports/trivy-report.json %IMAGE_REF%
+                """
             }
             post {
                 always {
