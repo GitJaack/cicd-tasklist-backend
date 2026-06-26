@@ -60,11 +60,12 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     withCredentials([string(credentialsId: 'yjack-sonar-token2', variable: 'SONAR_TOKEN')]) {
-                        bat '''
-                            sonar-scanner \
-                              -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                              -Dsonar.token=${SONAR_TOKEN}
-                        '''
+                        bat """
+                            sonar-scanner ^
+                            -Dsonar.projectKey=${SONAR_PROJECT_KEY} ^
+                            -Dsonar.host.url=%SONAR_HOST_URL% ^
+                            -Dsonar.token=%SONAR_TOKEN%
+                        """
                     }
                 }
             }
