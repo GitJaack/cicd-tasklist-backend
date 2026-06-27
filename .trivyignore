@@ -1,0 +1,14 @@
+# .trivyignore
+# Revue : 2026-06-27 — à ré-évaluer à chaque montée de version de l'image de base
+
+# --- OS (Debian bookworm) : pas de fix amont disponible ---
+CVE-2025-69720   # ncurses/libtinfo6 - affected, pas de correctif Debian publié
+CVE-2026-42496   # perl-base (Archive::Tar) - fix_deferred
+CVE-2026-8376    # perl-base - affected
+CVE-2026-42497   # perl-base (Archive::Tar) - fix_deferred
+CVE-2026-48962   # perl-base (IO::Compress) - affected
+CVE-2026-9538    # perl-base (Archive::Tar) - fix_deferred
+CVE-2023-45853   # zlib1g - will_not_fix officiel upstream (zipOpenNewFileInZip4_6, fonction non utilisée par notre image)
+
+# --- npm bundlé (picomatch interne, pas notre dépendance applicative) ---
+CVE-2026-33671   # picomatch 4.0.3 bundlé dans npm lui-même (usr/local/lib/node_modules/npm/...), pas dans notre package.json
