@@ -83,7 +83,7 @@ pipeline {
             steps {
                 bat """
                     docker pull node:22-slim
-                    docker build -t %IMAGE_REF% -t %IMAGE_NAME%:latest .
+                    docker build --no-cache -t %IMAGE_REF% -t %IMAGE_NAME%:latest .
                 """
             }
         }
