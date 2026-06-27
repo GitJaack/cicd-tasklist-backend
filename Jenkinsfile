@@ -45,7 +45,7 @@ pipeline {
             }
         }
 
-        stage('5. End-to-end tests') {
+        stage('4. End-to-end tests') {
             steps {
                 bat 'npm run test:e2e -- --outputFile.junit=reports/junit-e2e.xml'
             }
@@ -56,7 +56,7 @@ pipeline {
             }
         }
 
-        stage('6. SonarQube analysis') {
+        stage('5. SonarQube analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     withCredentials([string(credentialsId: 'yjack-sonar-token2', variable: 'SONAR_TOKEN')]) {
@@ -71,7 +71,7 @@ pipeline {
             }
         }
 
-        stage('7. Quality Gate') {
+        stage('6. Quality Gate') {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
@@ -79,15 +79,16 @@ pipeline {
             }
         }
 
-        stage('8. Build Docker image') {
+        stage('7. Build Docker image') {
             steps {
                 bat """
+                    docker pull node:22-slim
                     docker build -t %IMAGE_REF% -t %IMAGE_NAME%:latest .
                 """
             }
         }
 
-        stage('9. Trivy scan + reports') {
+        stage('8. Trivy scan + reports') {
             steps {
                 bat """
                     if not exist reports mkdir reports
@@ -106,22 +107,22 @@ pipeline {
             }
         }
 
-        stage('Trivy security gate') {
+        stage('9. Trivy security gate') {
             steps {
-                bat '''
-                    trivy image --no-progress --exit-code 1 \
+                bat """
+                    trivy image --no-progress --exit-code 1 ^
                         --severity HIGH,CRITICAL %IMAGE_REF%
-                '''
+                """
             }
         }
 
-        stage('11. Generate SBOM') {
+        stage('10. Generate SBOM') {
             steps {
-                bat '''
+                bat """
                     if not exist reports mkdir reports
-                    trivy image --no-progress --format cyclonedx \
+                    trivy image --no-progress --format cyclonedx ^
                         --output reports/sbom.cdx.json %IMAGE_REF%
-                '''
+                """
             }
             post {
                 always {
@@ -130,20 +131,19 @@ pipeline {
             }
         }
 
-        stage('12. Push Docker image') {
+        stage('11. Push Docker image') {
             steps {
-                bat '''
+                bat """
                     echo "%DOCKERHUB_CRED_PSW%" | docker login -u "%DOCKERHUB_CRED_USR%" --password-stdin
                     docker push %IMAGE_REF%
                     docker push %IMAGE_NAME%:latest
                     docker logout
-                '''
+                """
             }
         }
     }
 
     post {
-        // 13. Nettoyage du workspace Jenkins en fin de pipeline
         always {
             deleteDir()
         }
