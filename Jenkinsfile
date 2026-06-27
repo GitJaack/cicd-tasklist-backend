@@ -109,11 +109,7 @@ pipeline {
 
         stage('9. Trivy security gate') {
             steps {
-                bat """
-                    trivy image --no-progress --exit-code 1 ^
-                        --severity HIGH,CRITICAL %IMAGE_REF% ^
-                        --ignorefile .trivyignore %IMAGE_REF%
-                """
+                bat 'trivy image --no-progress --exit-code 1 --severity HIGH,CRITICAL --ignorefile .trivyignore %IMAGE_REF%'
             }
         }
 
