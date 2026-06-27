@@ -110,7 +110,7 @@ pipeline {
             steps {
                 bat '''
                     trivy image --no-progress --exit-code 1 \
-                        --severity HIGH,CRITICAL ${IMAGE_REF}
+                        --severity HIGH,CRITICAL %IMAGE_REF%
                 '''
             }
         }
@@ -118,9 +118,9 @@ pipeline {
         stage('11. Generate SBOM') {
             steps {
                 bat '''
-                    mkdir -p reports
+                    if not exist reports mkdir reports
                     trivy image --no-progress --format cyclonedx \
-                        --output reports/sbom.cdx.json ${IMAGE_REF}
+                        --output reports/sbom.cdx.json %IMAGE_REF%
                 '''
             }
             post {
@@ -133,9 +133,9 @@ pipeline {
         stage('12. Push Docker image') {
             steps {
                 bat '''
-                    echo "${DOCKERHUB_CRED_PSW}" | docker login -u "${DOCKERHUB_CRED_USR}" --password-stdin
-                    docker push ${IMAGE_REF}
-                    docker push ${IMAGE_NAME}:latest
+                    echo "%DOCKERHUB_CRED_PSW%" | docker login -u "%DOCKERHUB_CRED_USR%" --password-stdin
+                    docker push %IMAGE_REF%
+                    docker push %IMAGE_NAME%:latest
                     docker logout
                 '''
             }
